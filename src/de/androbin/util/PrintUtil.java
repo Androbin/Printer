@@ -1,6 +1,5 @@
 package de.androbin.util;
 
-import static de.androbin.math.util.floats.FloatMathUtil.*;
 import java.awt.*;
 import java.awt.image.*;
 import javax.swing.*;
@@ -26,7 +25,7 @@ public final class PrintUtil
 				
 				if ( g != null && res > 0 )
 				{
-					final int rand = round( res / 1.27f );
+					final int rand = Math.round( res / 1.27f );
 					
 					final int w = dim.width - ( rand << 1 );
 					final int h = dim.height - ( rand << 1 );
