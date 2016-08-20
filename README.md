@@ -1,1 +1,3 @@
 # Printer
+Dependencies:
+ - GFX
