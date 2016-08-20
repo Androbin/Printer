@@ -1,7 +1,9 @@
 package de.androbin.util;
 
+import static de.androbin.gfx.util.GraphicsUtil.*;
 import java.awt.*;
 import java.awt.image.*;
+import java.util.function.*;
 import javax.swing.*;
 
 public final class PrintUtil
@@ -12,6 +14,27 @@ public final class PrintUtil
 	
 	public static void print( final BufferedImage image, final String title )
 	{
+		print( ( job, g ) ->
+		{
+			final int res = job.getPageResolution();
+			final Dimension dim = job.getPageDimension();
+			
+			final float rand = res / 1.27f;
+			
+			final float w = dim.width - rand * 2f;
+			final float h = dim.height - rand * 2f;
+			
+			final boolean format = h * image.getWidth() < w * image.getHeight();
+			
+			final float width = format ? h * image.getWidth() / image.getHeight() : w;
+			final float height = format ? h : w * image.getHeight() / image.getWidth();
+			
+			drawImage( g, image, ( dim.width - width ) * 0.5f, ( dim.height - height ) * 0.5f, width, height );
+		}, title );
+	}
+	
+	public static void print( final BiConsumer<PrintJob, Graphics> renderer, final String title )
+	{
 		new Thread( () ->
 		{
 			final JFrame window = new JFrame();
@@ -19,31 +42,13 @@ public final class PrintUtil
 			
 			if ( job != null )
 			{
-				final int res = job.getPageResolution();
-				final Dimension dim = job.getPageDimension();
 				final Graphics g = job.getGraphics();
-				
-				if ( g != null && res > 0 )
-				{
-					final int rand = Math.round( res / 1.27f );
-					
-					final int w = dim.width - ( rand << 1 );
-					final int h = dim.height - ( rand << 1 );
-					
-					final boolean format = h * image.getWidth() < w * image.getHeight();
-					
-					final int width = format ? h * image.getWidth() / image.getHeight() : w;
-					final int height = format ? h : w * image.getHeight() / image.getWidth();
-					
-					g.drawImage( image, ( dim.width >> 1 ) - ( width >> 1 ), ( dim.height >> 1 ) - ( height >> 1 ), width, height, window );
-					g.dispose();
-				}
-				
+				renderer.accept( job, g );
+				g.dispose();
 				job.end();
 			}
 			
 			window.dispose();
-			
-		} , "Printer" ).start();
+		}, "Printer" ).start();
 	}
 }
