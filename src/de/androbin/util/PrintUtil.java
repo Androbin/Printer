@@ -7,18 +7,20 @@ import java.util.function.*;
 import javax.swing.*;
 
 public final class PrintUtil {
+  private static final float EDGE = 2f; // cm
+  
   private PrintUtil() {
   }
   
   public static void print( final BufferedImage image, final String title ) {
     print( ( job, g ) -> {
-      final int res = job.getPageResolution();
       final Dimension dim = job.getPageDimension();
+      final float res = job.getPageResolution() / 2.54f; // px cm^-1
       
-      final float rand = res / 1.27f;
+      final float edge = res * EDGE;
       
-      final float w = dim.width - rand * 2f;
-      final float h = dim.height - rand * 2f;
+      final float w = dim.width - 2f * edge;
+      final float h = dim.height - 2f * edge;
       
       final boolean format = h * image.getWidth() < w * image.getHeight();
       
@@ -45,6 +47,6 @@ public final class PrintUtil {
       }
       
       window.dispose();
-    }, "Printer" ).start();
+    }, "PrintJob" ).start();
   }
 }
